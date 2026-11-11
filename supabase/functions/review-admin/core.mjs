@@ -8,6 +8,7 @@ export function validReviewDate(date,now=Date.now()){
 export async function handleAdmin(request,env,fetcher=fetch,verify=verifyAccess){
   if(request.method!=='POST')return reply({error:'잘못된 요청입니다.'},405);
   if(!await verify(request.headers.get('x-access-jwt'),env,fetcher))return reply({error:'접근 권한이 없습니다.'},403);
+  if(env.MIGRATION_READ_ONLY==='true')return reply({error:'자료 이전 중에는 변경할 수 없습니다.'},503);
   let body;try{const text=await request.text();if(text.length>8192)throw Error();body=JSON.parse(text);if(!body||typeof body!=='object'||Array.isArray(body))throw Error()}catch{return reply({error:'입력값을 확인해 주세요.'},400)}
   if(!env.SUPABASE_URL||!env.SUPABASE_SECRET_KEY)return reply({error:'후기 서비스를 사용할 수 없습니다.'},503);
   const endpoint=new URL('/rest/v1/reviews',env.SUPABASE_URL),headers={apikey:env.SUPABASE_SECRET_KEY,'content-type':'application/json',prefer:'return=minimal'};

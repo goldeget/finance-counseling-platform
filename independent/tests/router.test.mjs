@@ -11,3 +11,9 @@ test('public hostname does not expose admin APIs',async()=>{
   const res=await mod.route?.(new Request('https://loan.example.com/api/admin/applications'),env,async()=>true);
   assert.equal(res?.status,404);
 });
+test('migration read-only mode rejects customer and admin writes before database access',async()=>{
+  let used=false;const env={PUBLIC_HOST:'loan.example.com',ADMIN_HOST:'admin-loan.example.com',MIGRATION_READ_ONLY:'true',DB:{prepare(){used=true;throw Error()}}};
+  const customer=await mod.route(new Request('https://loan.example.com/api/applications',{method:'POST'}),env,async()=>true);
+  const admin=await mod.route(new Request('https://admin-loan.example.com/api/admin/reviews',{method:'POST'}),env,async()=>true);
+  assert.equal(customer.status,503);assert.equal(admin.status,503);assert.equal(used,false);
+});

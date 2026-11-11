@@ -9,6 +9,7 @@ export async function route(request,env,verify=verifyAccess){
   if(url.hostname!==env.PUBLIC_HOST&&!admin)return reply({error:'Not found'},404);
   if(admin){
     if(!await verify(request.headers.get('cf-access-jwt-assertion'),env))return reply({error:'접근 권한이 없습니다.'},403);
+    if(env.MIGRATION_READ_ONLY==='true'&&path.startsWith('/api/admin/')&&!['GET','HEAD'].includes(request.method))return reply({error:'자료 이전 중에는 변경할 수 없습니다.'},503);
     if(path==='/api/admin/applications'&&request.method==='GET')return listApplications(request,env);
     const app=path.match(/^\/api\/admin\/applications\/([0-9a-f-]{36})$/i);
     if(app&&request.method==='DELETE')return deleteApplication(request,env,app[1]);
@@ -23,7 +24,7 @@ export async function route(request,env,verify=verifyAccess){
     }
     return null;
   }
-  if(path==='/api/applications'&&request.method==='POST')return submitApplication(request,env);
+  if(path==='/api/applications'&&request.method==='POST')return env.MIGRATION_READ_ONLY==='true'?reply({error:'서비스 준비 중입니다. 잠시 후 다시 시도해 주세요.'},503):submitApplication(request,env);
   if(path==='/api/reviews'&&request.method==='GET')return env.SUPABASE_URL?listSupabaseReviews(request,env):listReviews(request,env);
   if(path.startsWith('/api/'))return reply({error:'Not found'},404);
   return null;

@@ -6,6 +6,10 @@ test('admin mutation never reaches the database without a verified Access token'
  let writes=0;const response=await handleAdmin(request({action:'delete',id:'123e4567-e89b-42d3-a456-426614174000'}),env,async()=>{writes++;return new Response(null,{status:204})},async()=>false);
  assert.equal(response.status,403);assert.equal(writes,0);
 });
+test('migration mode blocks direct function writes even for an authorized administrator',async()=>{
+ let writes=0;const response=await handleAdmin(request({action:'delete',id:'123e4567-e89b-42d3-a456-426614174000'}),{...env,MIGRATION_READ_ONLY:'true'},async()=>{writes++;return new Response(null,{status:204})},async()=>true);
+ assert.equal(response.status,503);assert.equal(writes,0);
+});
 test('authorized review creation masks the name and rejects contact information',async()=>{
  let saved;const fetcher=async(_url,opts)=>{saved=JSON.parse(opts.body);return new Response(null,{status:201})};
  const review={author:'김고객',source:'고객 확인 후기',rating:5,content:'상담을 잘 받았습니다.',reviewDate:'2026-01-01',confirmed:true};
