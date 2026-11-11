@@ -23,3 +23,5 @@ jobs:
         run: node independent/build.mjs
       - name: Verify application and retention logic
         run: node --test independent/tests/*.test.mjs
+      - name: Verify the existing-site retention bridge
+        run: node --test tests/retention-bridge.test.mjs
