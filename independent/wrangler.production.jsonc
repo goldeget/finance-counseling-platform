@@ -1,0 +1,26 @@
+{
+  // Candidate configuration: no route is attached here. Complete the cutover
+  // checklist in 운영_및_전환_안내.md before connecting the production domains.
+  "name": "finance-counseling-production",
+  "account_id": "8359160c37fcc4cd253e2ca1df2fd63b",
+  "main": "src/worker.mjs",
+  "compatibility_date": "2024-11-01",
+  "workers_dev": false,
+  "preview_urls": false,
+  "d1_databases": [{
+    "binding": "DB",
+    "database_name": "finance-counseling-production",
+    "database_id": "daa62beb-a665-46c0-a6a1-3d1e8cf648a4"
+  }],
+  "vars": {
+    "PUBLIC_HOST": "loan.climekr.com",
+    "ADMIN_HOST": "admin-loan.climekr.com",
+    "ACCESS_TEAM_DOMAIN": "still-wildflower-dbed.cloudflareaccess.com",
+    "ACCESS_AUD": "12d31462a7674a43784a2c90fa1efbd1b56d6f438e2f4164cb986ac480fe460e",
+    "ADMIN_EMAIL": "4tencpkr@gmail.com",
+    "SUPABASE_URL": "https://mkdbexvhdayegvjgpkky.supabase.co",
+    "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_UaF_7-9-zlXNc5Mv0eu_jA_PCJFUvMW"
+  },
+  "triggers": {"crons": ["0 18 * * *"]},
+  "observability": {"enabled": true}
+}

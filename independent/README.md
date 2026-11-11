@@ -27,6 +27,9 @@ administrator login, retention schedule, backups and end-to-end tests are verifi
 - wrangler.staging.jsonc points only to the staging Worker and database. It does not
   deploy production and must not be reused for production without a separately
   reviewed configuration.
+- wrangler.production.jsonc describes the un-routed production candidate. It has no
+  domain routes: follow the Korean operations and cutover guide before attaching
+  either production hostname.
 
 ## Outstanding
 
