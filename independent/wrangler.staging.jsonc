@@ -1,0 +1,27 @@
+{
+  "name": "finance-counseling-staging",
+  "account_id": "8359160c37fcc4cd253e2ca1df2fd63b",
+  "main": "src/worker.mjs",
+  "compatibility_date": "2024-11-01",
+  "workers_dev": true,
+  "preview_urls": false,
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "finance-counseling-staging",
+      "database_id": "b15c3d64-8da7-46de-a56d-62d7ce7f8ad2"
+    }
+  ],
+  "vars": {
+    "STAGING": "true",
+    "PUBLIC_HOST": "finance-counseling-staging.4tencpkr.workers.dev",
+    "ADMIN_HOST": "stage-finance-admin.climekr.com",
+    "ACCESS_TEAM_DOMAIN": "still-wildflower-dbed.cloudflareaccess.com",
+    "ACCESS_AUD": "4b13de5c7d2267311302c7d263f6206a19669d22c3ecb3a6dde2d0b1c3f52202",
+    "ADMIN_EMAIL": "4tencpkr@gmail.com",
+    "SUPABASE_URL": "https://mkdbexvhdayegvjgpkky.supabase.co",
+    "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_UaF_7-9-zlXNc5Mv0eu_jA_PCJFUvMW"
+  },
+  "triggers": {"crons": ["0 18 * * *"]},
+  "observability": {"enabled": true, "traces": {"enabled": true}}
+}

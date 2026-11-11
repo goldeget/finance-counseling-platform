@@ -1,0 +1,30 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {DatabaseSync} from 'node:sqlite';import {readFileSync} from 'node:fs';
+const mod=await import('../src/reviews.mjs').catch(()=>({}));
+test('review listing preserves half ratings, source, totals and filter',async()=>{
+  const sqlite=new DatabaseSync(':memory:');sqlite.exec(readFileSync(new URL('../schema.sql',import.meta.url),'utf8'));
+  const add=sqlite.prepare('INSERT INTO reviews VALUES (?,?,?,?,?,?,?)');
+  add.run('a','김**','고객 확인 후기',4.5,'첫 후기','2026-11-10','2026-11-10T00:00:00Z');
+  add.run('b','이**','고객 확인 후기',5,'두 번째 후기','2026-11-11','2026-11-11T00:00:00Z');
+  sqlite.prepare('INSERT INTO review_stats(rating,count) VALUES (?,?)').run(4.5,1);
+  sqlite.prepare('INSERT INTO review_stats(rating,count) VALUES (?,?)').run(5,1);
+  const db={prepare(sql){if(/count\(\*\).*from reviews/i.test(sql))throw Error('full scan');return {bind(...args){return {first:async()=>sqlite.prepare(sql).get(...args)||null,all:async()=>({results:sqlite.prepare(sql).all(...args)})}}}}};
+  const r=await mod.listReviews?.(new Request('https://loan.example/api/reviews?rating=4.5&limit=12'),{DB:db});
+  assert.equal(r?.status,200);const result=await r.json();
+  assert.equal(result.total,2);assert.equal(result.filteredTotal,1);assert.equal(result.average,4.75);
+  assert.equal(result.items[0].content,'첫 후기');assert.equal(result.items[0].rating,4.5);assert.equal(result.items[0].source,'고객 확인 후기');
+  sqlite.exec(readFileSync(new URL('../review-stats-triggers.sql',import.meta.url),'utf8'));
+  sqlite.prepare('DELETE FROM reviews WHERE id=?').run('a');
+  assert.equal(sqlite.prepare('SELECT count FROM review_stats WHERE rating=4.5').get().count,0);
+  add.run('c','박**','고객 확인 후기',4.5,'새 후기','2026-11-11','2026-11-11T00:00:00Z');
+  assert.equal(sqlite.prepare('SELECT count FROM review_stats WHERE rating=4.5').get().count,1);
+});
+test('admin can publish a confirmed review with a masked author and no contact details',async()=>{
+  const sqlite=new DatabaseSync(':memory:');sqlite.exec(readFileSync(new URL('../schema.sql',import.meta.url),'utf8'));sqlite.exec(readFileSync(new URL('../review-stats-triggers.sql',import.meta.url),'utf8'));
+  const db={prepare(sql){return {bind(...args){return {run:async()=>({meta:{changes:Number(sqlite.prepare(sql).run(...args).changes)}})}}}}};
+  const body={author:'김고객',source:'고객 확인 후기',rating:5,content:'상담을 잘 받았습니다.',reviewDate:'2026-01-01',confirmed:true};
+  const make=data=>new Request('https://admin.example/api/admin/reviews',{method:'POST',headers:{origin:'https://admin.example','content-type':'application/json'},body:JSON.stringify(data)});
+  const r=await mod.createReview?.(make(body),{DB:db});
+  assert.equal(r?.status,201);assert.equal(sqlite.prepare('SELECT author FROM reviews').get().author,'김**');
+  assert.equal(sqlite.prepare('SELECT count FROM review_stats WHERE rating=5').get().count,1);
+  assert.equal((await mod.createReview(make({...body,content:'010-1234-5678 연락주세요'}),{DB:db})).status,400);
+});
