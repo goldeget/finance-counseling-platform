@@ -33,9 +33,11 @@ administrator login, retention schedule, backups and end-to-end tests are verifi
 
 ## Outstanding
 
-Cloudflare's GitHub application has been granted repository access; a Workers
-Builds configuration and its scoped build token are still required for automatic
-deployments. The free Workers plan shares daily D1 limits with the existing USIM
+Workers Builds is connected to the repository for both the staging Worker and
+the read-only production candidate. It uses the account's pre-existing shared
+`workflows-starter-template build token`; revoking that token affects these builds.
+GitHub commits do not automatically deploy the Supabase review-admin function.
+The free Workers plan shares daily D1 limits with the existing USIM
 service, so do not bulk import 108,250 reviews into D1. Before cutover, verify
 live-data migration, production administrator audience, production secrets,
 recovery procedures, final synchronization and the scheduled deletion job.
