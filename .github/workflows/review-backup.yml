@@ -19,16 +19,17 @@ jobs:
     env:
       SUPABASE_URL: https://mkdbexvhdayegvjgpkky.supabase.co
       SUPABASE_PUBLISHABLE_KEY: sb_publishable_UaF_7-9-zlXNc5Mv0eu_jA_PCJFUvMW
-      REVIEW_BACKUP_DIRECTORY: ${{ runner.temp }}/finance-review-backup
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
       - name: Export two matching snapshots
+        env:
+          REVIEW_BACKUP_DIRECTORY: ${{ runner.temp }}/finance-review-backup
         run: node independent/review-backup-cli.mjs
       - name: Verify restore in a disposable database
-        run: python3 independent/review-restore-check.py "$REVIEW_BACKUP_DIRECTORY"
+        run: python3 independent/review-restore-check.py "$RUNNER_TEMP/finance-review-backup"
       - name: Save private review backup
         uses: actions/upload-artifact@v4
         with:
