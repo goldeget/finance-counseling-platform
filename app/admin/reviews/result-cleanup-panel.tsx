@@ -1,0 +1,7 @@
+'use client';
+import {useState} from 'react';
+export default function ResultCleanupPanel({onComplete}:{onComplete:()=>void}){
+ const [busy,setBusy]=useState(false),[status,setStatus]=useState('');
+ async function run(){setBusy(true);setStatus('대상 후기를 확인하고 있습니다.');try{const getCount=async()=>{const r=await fetch('/api/reviews/cleanup-result',{cache:'no-store'});const d=await r.json() as {remaining?:number;error?:string};if(!r.ok||typeof d.remaining!=='number')throw Error(d.error||'대상을 확인하지 못했습니다.');return d.remaining;};const initial=await getCount();let changed=0;while(true){const r=await fetch('/api/reviews/cleanup-result',{method:'POST'});const d=await r.json() as {changed?:number;error?:string};if(!r.ok||typeof d.changed!=='number')throw Error(d.error||'수정하지 못했습니다.');changed+=d.changed;setStatus(`대상 ${initial.toLocaleString()}건 중 ${changed.toLocaleString()}건 수정`);if(d.changed===0)break;}const left=await getCount();if(left)throw Error(`수정되지 않은 후기가 ${left.toLocaleString()}건 남았습니다.`);setStatus(`완료: 대상 ${initial.toLocaleString()}건, 남은 대상 0건.`);onComplete();}catch(e){setStatus((e instanceof Error?e.message:'수정하지 못했습니다.')+' 다시 실행하면 남은 후기부터 처리합니다.');}finally{setBusy(false);}}
+ return <section style={{background:'#f7f9fd',border:'1px solid #e7edf6',borderRadius:16,padding:22,margin:'24px 0'}}><h2>반복 자금 수령 문장 삭제</h2><p>요청한 반복 문장을 지우고 바로 앞의 연결 어미만 다듬습니다.</p><button type="button" disabled={busy} onClick={run}>{busy?'수정 중…':'반복 자금 수령 문장 정리'}</button><p role="status" aria-live="polite">{status}</p></section>;
+}

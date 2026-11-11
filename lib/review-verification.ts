@@ -1,0 +1,1 @@
+export const verificationSql = 'SELECT COUNT(*) AS total, COUNT(DISTINCT content) AS unique_count, COALESCE(SUM(instr(content, ?) > 0),0) AS common_count, COALESCE(SUM(instr(content, ?) > 0),0) AS long_count, COALESCE(SUM(instr(content, ?) > 0),0) AS result_count, COALESCE(SUM(instr(content, ?) > 0),0) AS match_count FROM reviews';
