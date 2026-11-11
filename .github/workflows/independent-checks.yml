@@ -1,0 +1,25 @@
+name: Independent platform checks
+
+on:
+  push:
+    branches: [main, independent-staging]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build static application assets
+        run: node independent/build.mjs
+      - name: Verify application and retention logic
+        run: node --test independent/tests/*.test.mjs
