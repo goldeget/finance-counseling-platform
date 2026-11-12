@@ -20,3 +20,12 @@ test('reports an absent notice, missing reviews, invalid admin redirect and fail
     await assert.rejects(checkLiveService(env, mockFetch(change)));
   }
 });
+test('attempts retention even when the public landing is unavailable', async () => {
+  const seen = [];
+  const fetcher = mockFetch({landing: 503});
+  await assert.rejects(checkLiveService({SITE_RETENTION_TOKEN: 'a'.repeat(64)}, async (url, opts) => {
+    seen.push(url);
+    return fetcher(url, opts);
+  }));
+  assert.ok(seen[0].endsWith('/api/retention-bridge'));
+});
