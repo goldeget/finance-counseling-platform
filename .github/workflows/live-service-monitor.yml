@@ -1,0 +1,27 @@
+name: Current site availability and retention fallback
+
+on:
+  schedule:
+    - cron: '0 19 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: finance-live-service-monitor
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check public service and run retention fallback
+        env:
+          SITE_RETENTION_TOKEN: ${{ secrets.SITE_RETENTION_TOKEN }}
+        run: node independent/live-monitor-cli.mjs
