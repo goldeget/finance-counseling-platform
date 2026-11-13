@@ -1,4 +1,4 @@
-name: Current site availability and retention fallback
+name: Independent service availability
 
 on:
   schedule:
@@ -21,7 +21,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Check public service and run retention fallback
-        env:
-          SITE_RETENTION_TOKEN: ${{ secrets.SITE_RETENTION_TOKEN }}
+      - name: Check public service and protected administration
         run: node independent/live-monitor-cli.mjs

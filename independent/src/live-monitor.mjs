@@ -1,9 +1,5 @@
-import {runLegacyRetention} from './legacy-retention-cron.mjs';
-
-// This checks the current Sites service. It is not a cutover or a cron log check.
+// This checks the independent public service; it does not prove cron execution.
 export async function checkLiveService(env, fetcher = fetch) {
-  // Attempt deletion first so a public-page or admin outage does not skip it.
-  const retention = await runLegacyRetention(env, fetcher);
   const get = (url) => fetcher(url, {redirect: 'manual', signal: AbortSignal.timeout(30000)});
   const landing = await get('https://loan.climekr.com/landing');
   if (landing.status !== 200) throw Error('Public landing unavailable');
@@ -15,7 +11,9 @@ export async function checkLiveService(env, fetcher = fetch) {
   if (!Number.isSafeInteger(body.total) || body.total < 1) throw Error('Review count unavailable');
   const admin = await get('https://admin-loan.climekr.com/');
   if (admin.status !== 302 || !admin.headers.get('location')?.includes('cloudflareaccess.com')) {
-    throw Error('Candidate admin authentication redirect unavailable');
+    throw Error('Admin authentication redirect unavailable');
   }
-  return {reviewTotal: body.total, expiredDeleted: retention.deleted};
+  const rejected=await fetcher('https://loan.climekr.com/api/applications',{method:'POST',redirect:'manual',signal:AbortSignal.timeout(30000)});
+  if(rejected.status!==403)throw Error('Submission origin protection unavailable');
+  return {reviewTotal: body.total};
 }
