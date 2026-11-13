@@ -15,3 +15,9 @@ test('returns encrypted pages to a valid token and rejects invalid cursors',asyn
   const body=await response.json();assert.equal(response.status,200);assert.equal(body.items.length,200);assert.equal(body.next,rows[199].id);
   assert.equal((await worker.fetch(new Request('https://backup.example/snapshot?after=invalid',{headers:h}),env())).status,400);
 });
+test('retention status is private and reports only completed maintenance metadata',async()=>{
+  const e={BACKUP_TOKEN:secret,DB:{prepare(){return {async first(){return {completed_at:'2026-11-14T18:00:03.000Z',deleted:2,more:0}}}}}};
+  assert.equal((await worker.fetch(new Request('https://backup.example/retention-status'),e)).status,404);
+  const res=await worker.fetch(new Request('https://backup.example/retention-status',{headers:{'x-backup-token':secret}}),e);
+  assert.deepEqual(await res.json(),{completed_at:'2026-11-14T18:00:03.000Z',deleted:2,more:false});
+});

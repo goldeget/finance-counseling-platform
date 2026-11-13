@@ -1,0 +1,4 @@
+[functions.review-admin]
+# Cloudflare Access assertion is verified by review-admin itself.
+verify_jwt = false
+entrypoint = './functions/review-admin/index.mjs'

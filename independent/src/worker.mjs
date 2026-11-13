@@ -31,5 +31,6 @@ export default {
     await env.DB.prepare('DELETE FROM submission_limits WHERE expires_at < ?').bind(event.scheduledTime).run();
     console.log(JSON.stringify({event:'application-retention',deleted:out.deleted,more:out.more,cutoff:out.cutoff}));
     if(out.more)throw new Error('Retention backlog remains; retry required');
+    await env.DB.prepare("INSERT INTO maintenance_status (name,completed_at,deleted,more) VALUES ('application-retention',?,?,0) ON CONFLICT(name) DO UPDATE SET completed_at=excluded.completed_at,deleted=excluded.deleted,more=excluded.more").bind(new Date().toISOString(),out.deleted).run();
   }
 };

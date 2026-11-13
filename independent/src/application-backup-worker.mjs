@@ -12,8 +12,14 @@ async function validToken(provided,secret) {
 export default {
   async fetch(request,env) {
     const u=new URL(request.url);
-    if(request.method!=='GET'||u.pathname!=='/snapshot')return reply({error:'Not found'},404);
+    if(request.method!=='GET'||!['/snapshot','/retention-status'].includes(u.pathname))return reply({error:'Not found'},404);
     if(!await validToken(request.headers.get('x-backup-token')||'',env.BACKUP_TOKEN))return reply({error:'Not found'},404);
+    if(u.pathname==='/retention-status') {
+      try {
+        const row=await env.DB.prepare("SELECT completed_at,deleted,more FROM maintenance_status WHERE name='application-retention'").first();
+        return row ? reply({completed_at:row.completed_at,deleted:row.deleted,more:row.more!==0},200) : reply({error:'No completed run'},503);
+      } catch { return reply({error:'Retention status unavailable'},503); }
+    }
     const cursor=u.searchParams.get('after')||'';
     if(cursor&&!/^[0-9a-f-]{36}$/i.test(cursor))return reply({error:'Invalid cursor'},400);
     try {
