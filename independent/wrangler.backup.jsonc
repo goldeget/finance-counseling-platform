@@ -1,0 +1,10 @@
+{
+  "name": "finance-counseling-app-backup",
+  "account_id": "8359160c37fcc4cd253e2ca1df2fd63b",
+  "main": "src/application-backup-worker.mjs",
+  "compatibility_date": "2026-11-13",
+  "workers_dev": true,
+  "preview_urls": false,
+  "d1_databases": [{"binding":"DB","database_name":"finance-counseling-production","database_id":"daa62beb-a665-46c0-a6a1-3d1e8cf648a4"}],
+  "observability": {"enabled": true}
+}

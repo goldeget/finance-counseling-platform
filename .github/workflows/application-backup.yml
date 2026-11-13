@@ -1,0 +1,31 @@
+name: Encrypted application backup
+on:
+  schedule:
+    - cron: '20 18 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: finance-application-backup
+  cancel-in-progress: false
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Collect, encrypt and verify application backup
+        env:
+          BACKUP_URL: https://finance-counseling-app-backup.4tencpkr.workers.dev
+          BACKUP_TOKEN: ${{ secrets.APPLICATION_BACKUP_TOKEN }}
+          APPLICATION_ENCRYPTION_KEY: ${{ secrets.APPLICATION_ENCRYPTION_KEY }}
+        run: node independent/application-backup-cli.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: encrypted-applications-${{ github.run_id }}
+          path: ${{ runner.temp }}/finance-application-backup/applications.enc.json
+          if-no-files-found: error
+          retention-days: 7
