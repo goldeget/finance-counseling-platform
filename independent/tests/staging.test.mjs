@@ -12,3 +12,8 @@ test('staging admin still requires an independently verified Access token',async
   const response=await mod.default?.fetch(request,env);
   assert.equal(response?.status,403);
 });
+test('staging QA page requires Access authentication',async()=>{
+  const request=new Request('https://admin.example/qa-test');
+  const env={STAGING:'true',STAGING_TOKEN:'secret',PUBLIC_HOST:'staging.example',ADMIN_HOST:'admin.example'};
+  assert.equal((await mod.default.fetch(request,env)).status,403);
+});

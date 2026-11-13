@@ -9,6 +9,8 @@ export async function route(request,env,verify=verifyAccess){
   if(url.hostname!==env.PUBLIC_HOST&&!admin)return reply({error:'Not found'},404);
   if(admin){
     if(!await verify(request.headers.get('cf-access-jwt-assertion'),env))return reply({error:'접근 권한이 없습니다.'},403);
+    // Isolated QA submissions are available only on the authenticated staging admin host.
+    if(env.STAGING==='true'&&env.MIGRATION_READ_ONLY!=='true'&&path==='/api/applications'&&request.method==='POST')return submitApplication(request,env);
     if(env.MIGRATION_READ_ONLY==='true'&&path.startsWith('/api/admin/')&&!['GET','HEAD'].includes(request.method))return reply({error:'자료 이전 중에는 변경할 수 없습니다.'},503);
     if(path==='/api/admin/applications'&&request.method==='GET')return listApplications(request,env);
     const app=path.match(/^\/api\/admin\/applications\/([0-9a-f-]{36})$/i);

@@ -17,3 +17,10 @@ test('migration read-only mode rejects customer and admin writes before database
   const admin=await mod.route(new Request('https://admin-loan.example.com/api/admin/reviews',{method:'POST'}),env,async()=>true);
   assert.equal(customer.status,503);assert.equal(admin.status,503);assert.equal(used,false);
 });
+test('staging QA submission remains restricted to an authorized staging admin host',async()=>{
+  const request=()=>new Request('https://admin-loan.example.com/api/applications',{method:'POST'});
+  const env={PUBLIC_HOST:'loan.example.com',ADMIN_HOST:'admin-loan.example.com',STAGING:'true'};
+  assert.equal((await mod.route(request(),env,async()=>false)).status,403);
+  assert.equal((await mod.route(request(),env,async()=>true)).status,403); // Missing same-origin header.
+  assert.equal(await mod.route(request(),{...env,STAGING:'false'},async()=>true),null);
+});

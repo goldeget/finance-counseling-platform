@@ -14,7 +14,11 @@ export default {
     const routed=await route(request,env);if(routed)return routed;
     const url=new URL(request.url);
     if(request.method!=='GET'&&request.method!=='HEAD')return response('Not found','text/plain',404);
-    if(url.hostname===env.ADMIN_HOST)return (url.pathname==='/'||url.pathname==='/admin')?response(admin,'text/html; charset=utf-8'):response('Not found','text/plain',404);
+    if(url.hostname===env.ADMIN_HOST){
+      if(env.STAGING==='true'&&url.pathname==='/qa-test')return response(landing,'text/html; charset=utf-8');
+      if(env.STAGING==='true'&&url.pathname==='/consultation-progress.mjs')return response(progress,'text/javascript; charset=utf-8');
+      return (url.pathname==='/'||url.pathname==='/admin')?response(admin,'text/html; charset=utf-8'):response('Not found','text/plain',404);
+    }
     if(url.hostname!==env.PUBLIC_HOST)return response('Not found','text/plain',404);
     if(url.pathname==='/'||url.pathname==='/landing'||url.pathname==='/landing.html')return response(landing,'text/html; charset=utf-8');
     if(url.pathname==='/reviews'||url.pathname==='/reviews.html')return response(reviews,'text/html; charset=utf-8');
