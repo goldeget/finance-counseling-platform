@@ -23,6 +23,10 @@ jobs:
           BACKUP_TOKEN: ${{ secrets.APPLICATION_BACKUP_TOKEN }}
           APPLICATION_ENCRYPTION_KEY: ${{ secrets.APPLICATION_ENCRYPTION_KEY }}
         run: node independent/application-backup-cli.mjs
+      - name: Restore into a temporary in-memory database
+        env:
+          APPLICATION_ENCRYPTION_KEY: ${{ secrets.APPLICATION_ENCRYPTION_KEY }}
+        run: printf '%s' "$APPLICATION_ENCRYPTION_KEY" | node independent/application-restore-check.mjs "$RUNNER_TEMP/finance-application-backup/applications.enc.json"
       - uses: actions/upload-artifact@v4
         with:
           name: encrypted-applications-${{ github.run_id }}
