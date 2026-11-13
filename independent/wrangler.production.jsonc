@@ -13,7 +13,7 @@
     "database_id": "daa62beb-a665-46c0-a6a1-3d1e8cf648a4"
   }],
   "vars": {
-    "MIGRATION_READ_ONLY": "true",
+    "MIGRATION_READ_ONLY": "false",
     "PUBLIC_HOST": "loan.climekr.com",
     "ADMIN_HOST": "admin-loan.climekr.com",
     "ACCESS_TEAM_DOMAIN": "still-wildflower-dbed.cloudflareaccess.com",
