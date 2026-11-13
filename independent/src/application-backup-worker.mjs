@@ -12,8 +12,10 @@ async function validToken(provided,secret) {
 export default {
   async fetch(request,env) {
     const u=new URL(request.url);
-    if(request.method!=='GET'||!['/snapshot','/retention-status'].includes(u.pathname))return reply({error:'Not found'},404);
+    const alarm=request.method==='POST'&&u.pathname==='/retention-alert';
+    if(!alarm&&(request.method!=='GET'||!['/snapshot','/retention-status'].includes(u.pathname)))return reply({error:'Not found'},404);
     if(!await validToken(request.headers.get('x-backup-token')||'',env.BACKUP_TOKEN))return reply({error:'Not found'},404);
+    if(alarm){console.error('Production retention health check failed');return new Response(null,{status:204,headers:{'Cache-Control':'no-store'}});}
     if(u.pathname==='/retention-status') {
       try {
         const row=await env.DB.prepare("SELECT completed_at,deleted,more FROM maintenance_status WHERE name='application-retention'").first();

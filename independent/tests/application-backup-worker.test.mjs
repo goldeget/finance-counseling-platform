@@ -21,3 +21,8 @@ test('retention status is private and reports only completed maintenance metadat
   const res=await worker.fetch(new Request('https://backup.example/retention-status',{headers:{'x-backup-token':secret}}),e);
   assert.deepEqual(await res.json(),{completed_at:'2026-11-14T18:00:03.000Z',deleted:2,more:false});
 });
+test('accepts a protected retention alarm and does not accept unauthenticated alarms',async()=>{
+  const req=(headers={})=>new Request('https://backup.example/retention-alert',{method:'POST',headers});
+  assert.equal((await worker.fetch(req(),env())).status,404);
+  assert.equal((await worker.fetch(req({'x-backup-token':secret}),env())).status,204);
+});

@@ -23,5 +23,5 @@
     "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_UaF_7-9-zlXNc5Mv0eu_jA_PCJFUvMW"
   },
   "triggers": {"crons": ["0 18 * * *"]},
-  "observability": {"enabled": true}
+  "observability": {"enabled": true, "issues": {"enabled": true}}
 }

@@ -6,5 +6,5 @@
   "workers_dev": true,
   "preview_urls": false,
   "d1_databases": [{"binding":"DB","database_name":"finance-counseling-production","database_id":"daa62beb-a665-46c0-a6a1-3d1e8cf648a4"}],
-  "observability": {"enabled": true}
+  "observability": {"enabled": true, "issues": {"enabled": true}}
 }

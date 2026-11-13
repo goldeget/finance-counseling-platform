@@ -21,3 +21,8 @@ jobs:
         env:
           APPLICATION_BACKUP_TOKEN: ${{ secrets.APPLICATION_BACKUP_TOKEN }}
         run: node independent/retention-health-cli.mjs
+      - name: Report failed health check to Cloudflare
+        if: failure()
+        env:
+          APPLICATION_BACKUP_TOKEN: ${{ secrets.APPLICATION_BACKUP_TOKEN }}
+        run: node independent/retention-alert-cli.mjs
