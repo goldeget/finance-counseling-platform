@@ -1,0 +1,33 @@
+name: Isolated legacy site cutover build
+on:
+  push:
+    branches: [cutover-build-20261113]
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify and unpack exact source
+        run: |
+          echo '3f897356dad43a86aa42b470d2d3e803b5eeda722a131c6bd5c74f86a5c4dec5  cutover-build/site-build-source.tar' | sha256sum -c -
+          mkdir "$RUNNER_TEMP/finance-site"
+          tar -xf cutover-build/site-build-source.tar -C "$RUNNER_TEMP/finance-site"
+      - name: Install and build
+        working-directory: ${{ runner.temp }}/finance-site
+        run: |
+          npm run install:ci
+          npm run build
+          test -f dist/server/index.js
+          tar -cf "$RUNNER_TEMP/finance-site-dist.tar" dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: finance-site-dist-e4c0311
+          path: ${{ runner.temp }}/finance-site-dist.tar
+          if-no-files-found: error
+          retention-days: 1
