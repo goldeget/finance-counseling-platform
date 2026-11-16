@@ -2,6 +2,7 @@ import {verifyAccess} from './access.mjs';
 import {submitApplication,listApplications,deleteApplication} from './api.mjs';
 import {listReviews,createReview} from './reviews.mjs';
 import {listSupabaseReviews,forwardReviewMutation} from './supabase-reviews.mjs';
+import {bulkCreateReviews} from './reviews-bulk.mjs';
 const headers={'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'};
 const reply=(x,status=200)=>Response.json(x,{status,headers});
 export async function route(request,env,verify=verifyAccess){
@@ -16,6 +17,7 @@ export async function route(request,env,verify=verifyAccess){
     const app=path.match(/^\/api\/admin\/applications\/([0-9a-f-]{36})$/i);
     if(app&&request.method==='DELETE')return deleteApplication(request,env,app[1]);
     if(path==='/api/reviews'&&request.method==='GET')return env.SUPABASE_URL?listSupabaseReviews(request,env):listReviews(request,env);
+    if(path==='/api/admin/reviews/bulk'&&request.method==='POST')return env.SUPABASE_URL?bulkCreateReviews(request,env):reply({error:'일괄 등록을 사용할 수 없습니다.'},503);
     if(path==='/api/admin/reviews'&&request.method==='POST')return env.SUPABASE_URL?forwardReviewMutation(request,env,'create'):createReview(request,env);
     const rev=path.match(/^\/api\/admin\/reviews\/([a-zA-Z0-9_-]{1,170})$/);
     if(rev&&request.method==='DELETE'){
