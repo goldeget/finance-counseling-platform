@@ -28,7 +28,10 @@ jobs:
       - name: Verify authorization and review handling
         run: node --test independent/tests/access.test.mjs independent/tests/review-admin-edge.test.mjs independent/tests/review-date.test.mjs
       - name: Require deployment credential
-        run: test -n "$SUPABASE_ACCESS_TOKEN" || { echo 'Missing SUPABASE_ACCESS_TOKEN; no deployment performed.' >&2; exit 1; }
+        # Token setup: see independent/TOKEN_SETUP.md. Use a project-scoped Supabase token,
+        # not a shared credential. Rotation order: add the new token to secrets, verify a
+        # manual workflow run succeeds, then revoke the previous token.
+        run: test -n "$SUPABASE_ACCESS_TOKEN" || { echo 'Missing SUPABASE_ACCESS_TOKEN; no deployment performed. See independent/TOKEN_SETUP.md.' >&2; exit 1; }
       - uses: supabase/setup-cli@3c2f5e2ae34c34e428e8e206e2c4d21fa2d20fbf
         with:
           version: 2.113.0
