@@ -9,7 +9,8 @@ export function startConsultationProgress({reducedMotion, now, requestFrame, onU
   onUpdate(1);
   function tick(time) {
     const ratio = Math.max(0, Math.min((time - startedAt) / duration, 1));
-    onUpdate(Math.min(100, 1 + Math.floor(ratio * 99)));
+    const eased = 1 - Math.pow(1 - ratio, 3);
+    onUpdate(Math.min(100, 1 + Math.floor(eased * 99)));
     if (ratio < 1) requestFrame(tick);
     else onComplete();
   }
