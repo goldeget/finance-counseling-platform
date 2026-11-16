@@ -1,0 +1,30 @@
+name: Supabase health
+
+on:
+  schedule:
+    - cron: '0 21 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: finance-supabase-health
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SUPABASE_URL: https://mkdbexvhdayegvjgpkky.supabase.co
+      SUPABASE_PUBLISHABLE_KEY: sb_publishable_UaF_7-9-zlXNc5Mv0eu_jA_PCJFUvMW
+      BACKUP_URL: https://finance-counseling-app-backup.4tencpkr.workers.dev
+      APPLICATION_BACKUP_TOKEN: ${{ secrets.APPLICATION_BACKUP_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check Supabase project liveness
+        run: node independent/supabase-health-cli.mjs
