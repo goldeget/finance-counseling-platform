@@ -1,0 +1,34 @@
+name: Rollback export
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: rollback-export
+  cancel-in-progress: false
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build rollback package against cutover baseline
+        env:
+          SUPABASE_URL: https://mkdbexvhdayegvjgpkky.supabase.co
+          SUPABASE_PUBLISHABLE_KEY: sb_publishable_UaF_7-9-zlXNc5Mv0eu_jA_PCJFUvMW
+          BACKUP_URL: https://finance-counseling-app-backup.4tencpkr.workers.dev
+          APPLICATION_BACKUP_TOKEN: ${{ secrets.APPLICATION_BACKUP_TOKEN }}
+          BASELINE_PATH: independent/baseline/cutover-reviews-baseline.json.gz
+          CUTOVER_AT: '2026-11-13T00:00:00+09:00'
+        run: node independent/rollback-export-cli.mjs
+      - name: Save rollback package (3-day retention)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rollback-package-${{ github.run_id }}
+          path: rollback-package.json
+          if-no-files-found: error
+          retention-days: 3
